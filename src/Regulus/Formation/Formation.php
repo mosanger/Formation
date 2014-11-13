@@ -1212,6 +1212,9 @@ class Formation extends FormBuilder {
 				'file',
 				'button',
 				'submit',
+				'email',
+				'tel',
+				'url',
 			];
 
 			if (!is_array($type) && !in_array($type, $types)) {
@@ -1288,30 +1291,17 @@ class Formation extends FormBuilder {
 
 		switch ($type) {
 			case "text":
-				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
-				$html .= $this->text($name, $value, $attributesField) . "\n";
-				break;
+			case "email":
+			case "tel":
 			case "search":
-				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
-				$html .= $this->search($name, $value, $attributesField) . "\n";
-				break;
 			case "password":
-				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
-				$html .= $this->password($name, $attributesField) . "\n";
-				break;
 			case "url":
-				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
-				$html .= $this->url($name, $value, $attributesField) . "\n";
-				break;
 			case "number":
-				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
-				$html .= $this->number($name, $value, $attributesField) . "\n";
-				break;
 			case "date":
-				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
-				$html .= $this->date($name, $value, $attributesField) . "\n";
-				break;
 			case "textarea":
+				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
+				$html .= $this->input($type, $name, $value, $attributesField) . "\n";
+				break;
 				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
 				$html .= $this->textarea($name, $value, $attributesField);
 				break;
@@ -2502,6 +2492,24 @@ class Formation extends FormBuilder {
 	}
 
 	/**
+	 * Get all error messages.
+	 *
+	 * @return array
+	 */
+	public function getError($key)
+	{
+		if (empty($this->errors)) {
+			foreach ($this->validationFields as $fieldName) {
+				$error = $this->errorMessage($fieldName);
+				if ($error)
+					$this->errors[$fieldName] = $error;
+			}
+		}
+
+		return $this->errors;
+	}
+
+	/**
 	 * Set error messages from session data.
 	 *
 	 * @param  string  $errors
@@ -2509,8 +2517,16 @@ class Formation extends FormBuilder {
 	 */
 	public function setErrors($session = 'errors')
 	{
-		$this->errors = Session::get($session);
+		$errors = Session::get($session);
 
+		if ($errors && $errors->count())
+		{
+			$bag = $errors->getBag('default');
+			foreach ($bag->keys() as $key)
+			{
+				$this->errors[$key] = $bag->first($key);
+			}
+		}
 		return $this->errors;
 	}
 
