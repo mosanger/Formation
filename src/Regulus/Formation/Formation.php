@@ -2519,13 +2519,18 @@ class Formation extends FormBuilder {
 	{
 		$errors = Session::get($session);
 
-		if ($errors && $errors->count())
+		if (is_a($errors, 'Illuminate\Support\ViewErrorBag'))
 		{
-			$bag = $errors->getBag('default');
-			foreach ($bag->keys() as $key)
+			if ($errors && $errors->count())
 			{
-				$this->errors[$key] = $bag->first($key);
+				$bag = $errors->getBag('default');
+				foreach ($bag->keys() as $key)
+				{
+					$this->errors[$key] = $bag->first($key);
+				}
 			}
+		} else {
+			$this->errors = $errors;
 		}
 		return $this->errors;
 	}
