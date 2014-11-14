@@ -582,6 +582,21 @@ class Formation extends FormBuilder {
 	}
 
 	/**
+	 * Open up a new HTML form and populate defaults with model properties
+	 *
+	 * @param  \Illuminate\Database\Eloquent\Model    $model
+	 * @param  array    $options
+	 * @return string
+	 */
+	public function model($model, array $options = [])
+	{
+		$this->setDefaults($model);
+		$this->setErrors();
+
+		return $this->open($options);
+	}
+
+	/**
 	 * Open up a new HTML form.
 	 *
 	 * @param  array    $options
