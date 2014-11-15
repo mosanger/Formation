@@ -59,6 +59,13 @@ class Formation extends FormBuilder {
 	protected $validationFields = [];
 
 	/**
+	 * Laravel FormRequest
+	 *
+	 * @var array
+	 */
+	protected $formRequest;
+
+	/**
 	 * The form values array or object.
 	 *
 	 * @var array
@@ -958,6 +965,9 @@ class Formation extends FormBuilder {
 	 */
 	protected function nameToLabel($name)
 	{
+		if (isset($this->labels[$name]))
+			return $this->labels[$name];
+
 		$nameArray = explode('.', $name);
 		if (count($nameArray) < 2) {
 			$nameFormatted = str_replace('_', ' ', $name);
@@ -1070,6 +1080,16 @@ class Formation extends FormBuilder {
 		return $id;
 	}
 
+	public function helptext($text)
+	{
+		if ($text)
+		{
+			$text = $this->entities($text);
+			return '<p class="helptext">' . $text . '</p>';
+		}
+		return '';
+	}
+
 	/**
 	 * Automatically set the field class for a field.
 	 *
@@ -1148,6 +1168,42 @@ class Formation extends FormBuilder {
 				$namePlaceholder = substr($namePlaceholder, 0, (strlen($namePlaceholder) - 1));
 
 			$attributes['placeholder'] = $namePlaceholder;
+		}
+		return $attributes;
+	}
+
+	public function setFormRequest($formRequest)
+	{
+		if ($formRequest && method_exists($formRequest, 'rules'))
+		{
+			$this->formRequest = $formRequest;
+		}
+	}
+
+	protected function addValidationAttributes($name, $type, $attributes = [])
+	{
+		static $rules;
+
+		if ($this->formRequest && method_exists($this->formRequest, 'rules'))
+		{
+			if (is_null($rules))
+				$rules = $this->formRequest->rules();
+
+			if (isset($rules[$name]))
+			{
+				if (!is_array($rules[$name]))
+					$rules[$name] = split('|', $rules[$name]);
+
+				foreach ($rules[$name] as $rule)
+				{
+					switch($rule)
+					{
+						case "required":
+							$attributes[$rule] = $rule;
+							break;
+					}
+				}
+			}
 		}
 		return $attributes;
 	}
@@ -1276,6 +1332,18 @@ class Formation extends FormBuilder {
 			unset($attributes['value']);
 		}
 
+		$error = null;
+		if (isset($attributes['error'])) {
+			$error = $attributes['error'];
+			unset($attributes['error']);
+		}
+
+		$helptext = null;
+		if (isset($attributes['helptext'])) {
+			$helptext = $attributes['helptext'];
+			unset($attributes['helptext']);
+		}
+
 		//set any field named "password" to a "password" field automatically; no type declaration required
 		if (substr($name, 0, 8) == "password" && is_null($type)) $type = "password";
 
@@ -1315,9 +1383,11 @@ class Formation extends FormBuilder {
 			case "date":
 			case "textarea":
 				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
+				$html .= $this->helptext($helptext);
 				$html .= $this->input($type, $name, $value, $attributesField) . "\n";
 				break;
 				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
+				$html .= $this->helptext($helptext);
 				$html .= $this->textarea($name, $value, $attributesField);
 				break;
 			case "hidden":
@@ -1325,6 +1395,7 @@ class Formation extends FormBuilder {
 				break;
 			case "select":
 				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
+				$html .= $this->helptext($helptext);
 				$html .= $this->select($name, $options, $nullOption, $value, $attributesField);
 				break;
 			case "checkbox":
@@ -1335,6 +1406,7 @@ class Formation extends FormBuilder {
 					$attributesLabel['class']  = "checkbox";
 				}
 				$html .= '<label>'.$this->checkbox($name, $value, false, $attributesField).' '.$label.'</label>';
+				$html .= $this->helptext($helptext);
 				break;
 			case "radio":
 				if (isset($attributesLabel['class'])) {
@@ -1343,11 +1415,11 @@ class Formation extends FormBuilder {
 					$attributesLabel['class']  = "radio";
 				}
 				$html .= '<label>'.$this->radio($name, $value, false, $attributesField).' '.$label.'</label>';
+				$html .= $this->helptext($helptext);
 				break;
 			case "checkbox-set":
 				//for checkbox set, use options as array of checkbox names
 				if ($fieldLabel) $html .= $this->label(null, $label, $attributesLabel);
-
 				$html .= $this->checkboxSet($options, $name, $attributesField);
 				break;
 			case "radio-set":
@@ -1356,6 +1428,7 @@ class Formation extends FormBuilder {
 				break;
 			case "file":
 				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
+				$html .= $this->helptext($helptext);
 				$html .= $this->file($name, $attributesField) . "\n";
 				break;
 			case "button":
@@ -1366,9 +1439,13 @@ class Formation extends FormBuilder {
 				break;
 		}
 
+		$htmlError = '';
 		if (Config::get('formation::fieldContainer.error') && !Config::get('formation::error.typeLabelTooltip'))
-			$html .= $this->error($name) . "\n";
+			$htmlError = $this->error($name) . "\n";
+		if ($error && !trim($htmlError))
+			$htmlError = $this->error($name, true, false, $error) . "\n";
 
+		$html .= $htmlError;
 		$html .= $this->closeFieldContainer();
 
 		return $html;
@@ -1471,7 +1548,11 @@ class Formation extends FormBuilder {
 
 		$name = $this->name($name);
 
-		if ($type != "hidden") $attributes = $this->addAccessKey($name, null, $attributes);
+		if ($type != "hidden")
+		{
+			$attributes = $this->addAccessKey($name, null, $attributes);
+			$attributes = $this->addValidationAttributes($name, $type, $attributes);
+		}
 
 		$attributes = array_merge($attributes, compact('type', 'name', 'value'));
 
