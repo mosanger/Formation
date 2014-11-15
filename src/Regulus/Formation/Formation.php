@@ -931,6 +931,12 @@ class Formation extends FormBuilder {
 				$attributes['class'] = Config::get('formation::label.class');
 			}
 		}
+		$attributesField = $this->addValidationAttributes($name, null, $attributes);
+		if (isset($attributesField['required']))
+		{
+			$attributes['class'] = (isset($attributes['class']) ? $attributes['class'] . ' ' : '') . 'required';
+		}
+
 		if (isset($attributes['control-label-class'])) unset($attributes['control-label-class']);
 
 		//add non-breakable space if label is empty
@@ -1200,6 +1206,13 @@ class Formation extends FormBuilder {
 					{
 						case "required":
 							$attributes[$rule] = $rule;
+							break;
+						case "email":
+						case "integer":
+						case "url":
+						case "date":
+						case "time":
+							$attributes['pattern'] = $rule;
 							break;
 					}
 				}
