@@ -66,6 +66,13 @@ class Formation extends FormBuilder {
 	protected $formRequest;
 
 	/**
+	 * Default Error Messages
+	 *
+	 * @var array
+	 */
+	protected $defaultErrors = [];
+
+	/**
 	 * The form values array or object.
 	 *
 	 * @var array
@@ -435,6 +442,11 @@ class Formation extends FormBuilder {
 	public function getLabels()
 	{
 		return $this->labels;
+	}
+
+	public function setDefaultErrors($messages = [])
+	{
+		$this->defaultErrors = $messages;
 	}
 
 	/**
@@ -1202,18 +1214,18 @@ class Formation extends FormBuilder {
 
 				foreach ($rules[$name] as $rule)
 				{
-					switch($rule)
+					if ($rule == 'required')
 					{
-						case "required":
-							$attributes[$rule] = $rule;
-							break;
-						case "email":
-						case "integer":
-						case "url":
-						case "date":
-						case "time":
+						$attributes[$rule] = $rule;
+					}
+					elseif (strpos($rule, 'regex:') === 0)
+					{
+						$attributes['pattern'] = str_replace('regex:', '', $rule);
+					}
+					elseif (in_array($rule, ['email', 'integer', 'url', 'date', 'time']))
+					{
+						if ($type != $rule)
 							$attributes['pattern'] = $rule;
-							break;
 					}
 				}
 			}
@@ -1433,10 +1445,12 @@ class Formation extends FormBuilder {
 			case "checkbox-set":
 				//for checkbox set, use options as array of checkbox names
 				if ($fieldLabel) $html .= $this->label(null, $label, $attributesLabel);
+				$html .= $this->helptext($helptext);
 				$html .= $this->checkboxSet($options, $name, $attributesField);
 				break;
 			case "radio-set":
 				if ($fieldLabel) $html .= $this->label(null, $label, $attributesLabel);
+				$html .= $this->helptext($helptext);
 				$html .= $this->radioSet($name, $options, null, $attributesField);
 				break;
 			case "file":
@@ -1455,8 +1469,12 @@ class Formation extends FormBuilder {
 		$htmlError = '';
 		if (Config::get('formation::fieldContainer.error') && !Config::get('formation::error.typeLabelTooltip'))
 			$htmlError = $this->error($name) . "\n";
-		if ($error && !trim($htmlError))
+		if (!trim($htmlError))
+		{
+			if (!$error)
+				$error = $this->getDefaultError($name, $type, $attributesField);
 			$htmlError = $this->error($name, true, false, $error) . "\n";
+		}
 
 		$html .= $htmlError;
 		$html .= $this->closeFieldContainer();
@@ -1780,6 +1798,7 @@ class Formation extends FormBuilder {
 		$attributes['name'] = $this->name($attributes['name']);
 
 		$attributes = $this->addAccessKey($name, null, $attributes);
+		$attributes = $this->addValidationAttributes($name, 'select', $attributes);
 
 		return '<select'.$this->attributes($attributes).'>'.implode("\n", $html). "\n" .'</select>' . "\n";
 	}
@@ -2686,6 +2705,30 @@ class Formation extends FormBuilder {
 	public function getErrorClass()
 	{
 		return Config::get('formation::error.class');
+	}
+
+	protected function getDefaultError($name, $type, $attributes)
+	{
+		if ($this->defaultErrors)
+		{
+			$attributes = $this->addValidationAttributes($name, $type, $attributes);
+			$required = isset($attributes["required"]);
+			$type = str_replace('-set', '', $type);
+
+			$search[] = "$name.$type";
+			if ($required) $search[] = "$name.required";
+			$search[] = $name;
+			if ($required) $search[] = "$type.required";
+			$search[] = $type;
+			if ($required) $search[] = "required";
+
+			foreach ($search as $error)
+			{
+				if (isset($this->defaultErrors[$error]))
+					return $this->defaultErrors[$error];
+			}
+		}
+		return '';
 	}
 
 	/**
