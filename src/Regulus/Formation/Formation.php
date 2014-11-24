@@ -610,7 +610,6 @@ class Formation extends FormBuilder {
 	public function model($model, array $options = [])
 	{
 		$this->setDefaults($model);
-		$this->setErrors();
 
 		return $this->open($options);
 	}
@@ -623,6 +622,8 @@ class Formation extends FormBuilder {
 	 */
 	public function open(array $options = [])
 	{
+		$this->setErrors();
+
 		$method = array_get($options, 'method', 'post');
 
 		// We need to extract the proper method from the attributes. If the method is
@@ -878,7 +879,7 @@ class Formation extends FormBuilder {
 	 */
 	public function label($name = null, $label = null, $attributes = [], $save = true)
 	{
-		$attributes = $this->addErrorClass($name, $attributes);
+		//$attributes = $this->addErrorClass($name, $attributes);
 
 		if (!is_null($name) && $name != "") {
 			if (is_null($label)) $label = $this->nameToLabel($name);
@@ -1210,7 +1211,7 @@ class Formation extends FormBuilder {
 			if (isset($rules[$name]))
 			{
 				if (!is_array($rules[$name]))
-					$rules[$name] = split('|', $rules[$name]);
+					$rules[$name] = explode('|', $rules[$name]);
 
 				foreach ($rules[$name] as $rule)
 				{
@@ -1568,7 +1569,7 @@ class Formation extends FormBuilder {
 			unset($attributes['placeholder']);
 
 		$name = (isset($attributes['name'])) ? $attributes['name'] : $name;
-		$attributes = $this->addErrorClass($name, $attributes);
+		//$attributes = $this->addErrorClass($name, $attributes);
 
 		$attributes['id'] = $this->id($name, $attributes);
 
@@ -1737,7 +1738,7 @@ class Formation extends FormBuilder {
 		//automatically set placeholder attribute if config option is set
 		$attributes = $this->setFieldPlaceholder($name, $attributes);
 
-		$attributes = $this->addErrorClass($name, $attributes);
+		//$attributes = $this->addErrorClass($name, $attributes);
 
 		if (is_null($value)) $value = $this->value($name);
 		if (is_null($value)) $value = ''; //if value is still null, set it to an empty string
@@ -1771,7 +1772,7 @@ class Formation extends FormBuilder {
 	{
 		if (!isset($attributes['id'])) $attributes['id'] = $this->id($name, $attributes);
 		$attributes['name'] = $name;
-		$attributes = $this->addErrorClass($name, $attributes);
+		//$attributes = $this->addErrorClass($name, $attributes);
 
 		//add the field class if config option is set
 		$attributes = $this->setFieldClass($name, $attributes);
