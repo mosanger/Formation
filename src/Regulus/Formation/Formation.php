@@ -1407,11 +1407,11 @@ class Formation extends FormBuilder {
 			case "url":
 			case "number":
 			case "date":
-			case "textarea":
 				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
 				$html .= $this->helptext($helptext);
 				$html .= $this->input($type, $name, $value, $attributesField) . "\n";
 				break;
+			case "textarea":
 				if ($fieldLabel) $html .= $this->label($name, $label, $attributesLabel);
 				$html .= $this->helptext($helptext);
 				$html .= $this->textarea($name, $value, $attributesField);
@@ -1746,6 +1746,7 @@ class Formation extends FormBuilder {
 		$attributes['name'] = $this->name($attributes['name']);
 
 		$attributes = $this->addAccessKey($name, null, $attributes);
+		$attributes = $this->addValidationAttributes($name, 'text', $attributes);
 
 		return '<textarea'.$this->attributes($attributes).'>'.$this->entities($value).'</textarea>' . "\n";
 	}
