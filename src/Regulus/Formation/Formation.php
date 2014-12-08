@@ -1328,12 +1328,13 @@ class Formation extends FormBuilder {
 		} else {
 			$label = $name;
 		}
+
 		if (is_array($attributes) && array_key_exists('label', $attributes)) {
 			$label = $attributes['label'];
 			unset($attributes['label']);
 			$fieldLabel = true;
 		}
-		elseif (is_null($label)) $fieldLabel = false;
+		if (is_null($label)) $fieldLabel = false;
 
 		if (!is_array($attributes)) $attributes = [];
 
