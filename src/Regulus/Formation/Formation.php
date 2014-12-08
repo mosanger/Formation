@@ -1328,12 +1328,12 @@ class Formation extends FormBuilder {
 		} else {
 			$label = $name;
 		}
-		if (is_array($attributes) && isset($attributes['label'])) {
+		if (is_array($attributes) && array_key_exists('label', $attributes)) {
 			$label = $attributes['label'];
 			unset($attributes['label']);
 			$fieldLabel = true;
 		}
-		if (is_null($label)) $fieldLabel = false;
+		elseif (is_null($label)) $fieldLabel = false;
 
 		if (!is_array($attributes)) $attributes = [];
 
@@ -1379,7 +1379,7 @@ class Formation extends FormBuilder {
 		//set attributes up for label and field (remove element-specific attributes from label and vice versa)
 		$attributesLabel = [];
 		foreach ($attributes as $key => $attribute) {
-			if (substr($key, -6) != "-field" && substr($key, -10) != "-container" && $key != "id") {
+			if (substr($key, -6) == "-label") {
 				$key = str_replace('-label', '', $key);
 				$attributesLabel[$key] = $attribute;
 			}
@@ -1467,17 +1467,7 @@ class Formation extends FormBuilder {
 				break;
 		}
 
-		$htmlError = '';
-		if (Config::get('formation::fieldContainer.error') && !Config::get('formation::error.typeLabelTooltip'))
-			$htmlError = $this->error($name) . "\n";
-		if (!trim($htmlError))
-		{
-			if (!$error)
-				$error = $this->getDefaultError($name, $type, $attributesField);
-			$htmlError = $this->error($name, true, false, $error) . "\n";
-		}
-
-		$html .= $htmlError;
+		$html .= $this->error($name, $type, $error, $attributesField);
 		$html .= $this->closeFieldContainer();
 
 		return $html;
@@ -2733,6 +2723,21 @@ class Formation extends FormBuilder {
 		return '';
 	}
 
+	public function error($name, $type = 'text', $error = '', $attributesField = array())
+	{
+		$htmlError = '';
+		if (Config::get('formation::fieldContainer.error') && !Config::get('formation::error.typeLabelTooltip'))
+			$htmlError = $this->getErrorTag($name) . "\n";
+		if (!trim($htmlError))
+		{
+			if (!$error)
+				$error = $this->getDefaultError($name, $type, $attributesField);
+			$htmlError = $this->getErrorTag($name, true, false, $error) . "\n";
+		}
+
+		return $htmlError;
+	}
+
 	/**
 	 * Create error div for validation error if it exists for specified form field.
 	 *
@@ -2742,7 +2747,7 @@ class Formation extends FormBuilder {
 	 * @param  mixed   $customMessage
 	 * @return string
 	 */
-	public function error($name, $alwaysExists = false, $replacementFieldName = false, $customMessage = null)
+	protected function getErrorTag($name, $alwaysExists = false, $replacementFieldName = false, $customMessage = null)
 	{
 		if (substr($name, -1) == ".") $name = substr($name, 0, (strlen($name) - 1));
 
