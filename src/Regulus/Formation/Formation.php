@@ -1099,12 +1099,13 @@ class Formation extends FormBuilder {
 		return $id;
 	}
 
-	public function helptext($text)
+	public function helptext($text, $inline = false)
 	{
 		if ($text)
 		{
 			$text = $this->entities($text);
-			return '<p class="helptext">' . $text . '</p>';
+			$tag = $inline ? 'span' : 'p';
+			return '<' . $tag . ' class="helptext">' . $text . '</' . $tag . '>';
 		}
 		return '';
 	}
@@ -2094,7 +2095,15 @@ class Formation extends FormBuilder {
 
 				$attributes['id'] = $idPrefix.'-'.$idSuffix;
 
-				$radioButton .= '<label>'.$this->radio($name, $value, $checked, $attributes).' '.$display.'</label></div>' . "\n";
+				if (is_array($display))
+				{
+					$displayHtml = array_shift($display);
+					$displayHtml .= $this->helptext(array_shift($display), true);
+				}
+				else
+					$displayHtml = $display;
+
+				$radioButton .= '<label>'.$this->radio($name, $value, $checked, $attributes).' '.$displayHtml.'</label></div>' . "\n";
 				$html        .= $radioButton;
 			}
 
