@@ -952,6 +952,13 @@ class Formation extends FormBuilder {
 
 		if (isset($attributes['control-label-class'])) unset($attributes['control-label-class']);
 
+		$tooltip = '';
+		if (isset($attributes['tooltip']))
+		{
+			$tooltip = '<span class="tooltip" title="' . $this->entities($attributes['tooltip']) . '"></span>';
+			unset($attributes['tooltip']);
+		}
+
 		//add non-breakable space if label is empty
 		if ($label == "") $label = "&nbsp;";
 
@@ -968,7 +975,7 @@ class Formation extends FormBuilder {
 
 		$attributes = $this->attributes($attributes);
 
-		return '<label'.$attributes.'>'.$label.'</label>' . "\n";
+		return '<label'.$attributes.'>'.$tooltip.$label.'</label>' . "\n";
 	}
 
 	/**
