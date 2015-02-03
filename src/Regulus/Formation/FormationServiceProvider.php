@@ -18,7 +18,7 @@ class FormationServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('regulus/formation');
+		;
 	}
 
 	/**
@@ -28,6 +28,10 @@ class FormationServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
+		$configPath = __DIR__ . '/../../config/config.php';
+		$this->mergeConfigFrom($configPath, 'formation');
+		$this->publishes([$configPath => config_path('formation.php')]);
+
 		$this->app['formation'] = $this->app->share(function($app) {
 			return new Formation($app['html'], $app['url'], $app['session.store']->getToken());
 		});
