@@ -262,7 +262,7 @@ class BaseModel extends Eloquent {
 		$items           = $this->{$modelMethod};
 		$model           = get_class($this->{$modelMethod}()->getModel());
 		$formattedSuffix = Form::getFormattedFieldSuffix();
-		$pivotTimestamps = Config::get('formation::pivotTimestamps');
+		$pivotTimestamps = Config::get('formation.pivotTimestamps');
 
 		//create or update related items
 		foreach ($input as $index => $itemData)
