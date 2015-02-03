@@ -898,7 +898,7 @@ class Formation extends FormBuilder {
 		}
 
 		//add label suffix
-		$suffix = Config::get('formation::label.suffix');
+		$suffix = Config::get('formation.label.suffix');
 		if ($suffix != "" && (!isset($attributes['suffix']) || $attributes['suffix']))
 			$label .= $suffix;
 
@@ -906,11 +906,11 @@ class Formation extends FormBuilder {
 			unset($attributes['suffix']);
 
 		//add tooltip and tooltip attributes if necessary
-		if (Config::get('formation::error.typeLabelTooltip')) {
+		if (Config::get('formation.error.typeLabelTooltip')) {
 			$errorMessage = $this->errorMessage($name);
 
 			if ($errorMessage) {
-				$addAttributes = Config::get('formation::error.typeLabelAttributes');
+				$addAttributes = Config::get('formation.error.typeLabelAttributes');
 				foreach ($addAttributes as $attribute => $attributeValue) {
 					if (isset($attributes[$attribute]))
 						$attributes[$attribute] .= ' '.$attributeValue;
@@ -939,9 +939,9 @@ class Formation extends FormBuilder {
 		//add "control-label" class
 		if (!isset($attributes['control-label-class']) || $attributes['control-label-class']) {
 			if (isset($attributes['class']) && $attributes['class'] != "") {
-				$attributes['class'] .= ' '.Config::get('formation::label.class');
+				$attributes['class'] .= ' '.Config::get('formation.label.class');
 			} else {
-				$attributes['class'] = Config::get('formation::label.class');
+				$attributes['class'] = Config::get('formation.label.class');
 			}
 		}
 		$attributesField = $this->addValidationAttributes($name, null, $attributes);
@@ -1079,7 +1079,7 @@ class Formation extends FormBuilder {
 			$id = strtolower(str_replace('.', '-', str_replace('_', '-', str_replace(' ', '-', $name))));
 
 			//add ID prefix
-			$idPrefix = Config::get('formation::field.idPrefix');
+			$idPrefix = Config::get('formation.field.idPrefix');
 			if (!is_null($idPrefix) && $idPrefix !== false && $idPrefix != "")
 				$id = $idPrefix.$id;
 		}
@@ -1128,7 +1128,7 @@ class Formation extends FormBuilder {
 	protected function setFieldClass($name, $attributes = [], $type = 'text')
 	{
 		if (!in_array($type, ['hidden', 'checkbox', 'radio'])) {
-			$defaultClass = Config::get('formation::field.class');
+			$defaultClass = Config::get('formation.field.class');
 			if ($defaultClass != "") {
 				if (isset($attributes['class']) && $attributes['class'] != "") {
 					$attributes['class'] .= ' '.$defaultClass;
@@ -1182,7 +1182,7 @@ class Formation extends FormBuilder {
 	 */
 	protected function setFieldPlaceholder($name, $attributes = [])
 	{
-		$placeholder = Config::get('formation::field.autoPlaceholder');
+		$placeholder = Config::get('formation.field.autoPlaceholder');
 		if ($placeholder && !isset($attributes['placeholder'])) {
 			$namePlaceholder = $name;
 			if (isset($this->labels[$name]) && $this->labels[$name] != "") {
@@ -1278,7 +1278,7 @@ class Formation extends FormBuilder {
 	 */
 	public function entities($value)
 	{
-		return htmlentities($value, ENT_QUOTES, Config::get('formation::encoding'), false);
+		return htmlentities($value, ENT_QUOTES, Config::get('formation.encoding'), false);
 	}
 
 	/**
@@ -1330,7 +1330,7 @@ class Formation extends FormBuilder {
 		}
 
 		//allow label to be set via attributes array (defaults to labels array and then to a label derived from the field's name)
-		$fieldLabel = Config::get('formation::field.autoLabel');
+		$fieldLabel = Config::get('formation.field.autoLabel');
 		if (!is_null($name)) {
 			$label = $this->nameToLabel($name);
 		} else {
@@ -1500,9 +1500,9 @@ class Formation extends FormBuilder {
 			}
 		}
 		if (!isset($attributesFieldContainer['class']) || $attributesFieldContainer['class'] == "") {
-			$attributesFieldContainer['class'] = Config::get('formation::fieldContainer.class');
+			$attributesFieldContainer['class'] = Config::get('formation.fieldContainer.class');
 		} else {
-			$attributesFieldContainer['class'] .= ' '.Config::get('formation::fieldContainer.class');
+			$attributesFieldContainer['class'] .= ' '.Config::get('formation.fieldContainer.class');
 		}
 		if (!isset($attributesFieldContainer['id'])) {
 			$attributesFieldContainer['id'] = $this->id($name, $attributesFieldContainer).'-area';
@@ -1517,7 +1517,7 @@ class Formation extends FormBuilder {
 
 		$attributesFieldContainer = $this->addErrorClass($name, $attributesFieldContainer);
 
-		return '<'.Config::get('formation::fieldContainer.element').$this->attributes($attributesFieldContainer).'>' . "\n";
+		return '<'.Config::get('formation.fieldContainer.element').$this->attributes($attributesFieldContainer).'>' . "\n";
 	}
 
 	/**
@@ -1529,10 +1529,10 @@ class Formation extends FormBuilder {
 	{
 		$html = "";
 
-		if (Config::get('formation::fieldContainer.clear'))
+		if (Config::get('formation.fieldContainer.clear'))
 			$html .= '<div class="clear"></div>' . "\n";
 
-		$html .= '</'.Config::get('formation::fieldContainer.element').'>' . "\n";
+		$html .= '</'.Config::get('formation.fieldContainer.element').'>' . "\n";
 
 		return $html;
 	}
@@ -2713,7 +2713,7 @@ class Formation extends FormBuilder {
 	 */
 	public function getErrorClass()
 	{
-		return Config::get('formation::error.class');
+		return Config::get('formation.error.class');
 	}
 
 	protected function getDefaultError($name, $type, $attributes)
@@ -2743,7 +2743,7 @@ class Formation extends FormBuilder {
 	public function error($name, $type = 'text', $error = '', $attributesField = array())
 	{
 		$htmlError = '';
-		if (Config::get('formation::fieldContainer.error') && !Config::get('formation::error.typeLabelTooltip'))
+		if (Config::get('formation.fieldContainer.error') && !Config::get('formation.error.typeLabelTooltip'))
 			$htmlError = $this->getErrorTag($name) . "\n";
 		if (!trim($htmlError))
 		{
@@ -2778,7 +2778,7 @@ class Formation extends FormBuilder {
 		if (!is_null($customMessage))
 			$message = $customMessage;
 
-		$errorElement = Config::get('formation::error.element');
+		$errorElement = Config::get('formation.error.element');
 
 		if ($message && $message != "") {
 			return '<'.$errorElement.' class="error"'.$attr.'>'.$message.'</'.$errorElement.'>';
@@ -2867,7 +2867,7 @@ class Formation extends FormBuilder {
 		}
 
 		if ($errorMessage && !$ignoreIcon) {
-			$errorIcon = Config::get('formation::error.icon');
+			$errorIcon = Config::get('formation.error.icon');
 			if ($errorIcon) {
 				if (!preg_match("/glyphicon/", $errorMessage))
 					$errorMessage = '<span class="glyphicon glyphicon-'.$errorIcon.'"></span>&nbsp; '.$errorMessage;
@@ -2916,7 +2916,7 @@ class Formation extends FormBuilder {
 	 */
 	public function getJsonErrorSettings($session = 'errors')
 	{
-		$errorSettings = $this->formatSettingsForJs(Config::get('formation::error'));
+		$errorSettings = $this->formatSettingsForJs(Config::get('formation.error'));
 		return json_encode($errorSettings);
 	}
 
@@ -3066,7 +3066,7 @@ class Formation extends FormBuilder {
 	{
 		//if null, check config button icon config setting
 		if (is_null($icon))
-			$icon = Config::get('formation::autoButtonIcon');
+			$icon = Config::get('formation.autoButtonIcon');
 
 		if (is_null($update))
 			$update = $this->updateResource();
@@ -3115,7 +3115,7 @@ class Formation extends FormBuilder {
 	 */
 	public function getDateFormat()
 	{
-		return Config::get('formation::dateFormat');
+		return Config::get('formation.dateFormat');
 	}
 
 	/**
@@ -3125,7 +3125,7 @@ class Formation extends FormBuilder {
 	 */
 	public function getDateTimeFormat()
 	{
-		return Config::get('formation::dateTimeFormat');
+		return Config::get('formation.dateTimeFormat');
 	}
 
 	/**
