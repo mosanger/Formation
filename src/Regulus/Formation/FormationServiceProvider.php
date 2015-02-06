@@ -18,7 +18,9 @@ class FormationServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		;
+		$this->publishes([
+			__DIR__ . '/../../config/config.php' => config_path('formation.php')
+		]);
 	}
 
 	/**
@@ -28,9 +30,9 @@ class FormationServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$configPath = __DIR__ . '/../../config/config.php';
-		$this->mergeConfigFrom($configPath, 'formation');
-		$this->publishes([$configPath => config_path('formation.php')]);
+		$this->mergeConfigFrom(
+			__DIR__ . '/../../config/config.php', 'formation'
+		);
 
 		$this->app['formation'] = $this->app->share(function($app) {
 			return new Formation($app['html'], $app['url'], $app['session.store']->getToken());
